@@ -1,4 +1,4 @@
-from main_sugadintas import UserRepository, TaskRepository
+from main import UserRepository, TaskRepository
 
 # User interface
 print("Welcome TO DO list application")

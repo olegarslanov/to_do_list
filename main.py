@@ -4,9 +4,9 @@ from session import session
 
 class UserRepository:
     def email_check(self, login):
-        user = session.query(SAuser).filter_by(email=login).one()
+        user = session.query(SAuser).filter_by(email=login).one_or_none()
         if user:
-            return True
+            return user.id
         else:
             return False
 
@@ -20,19 +20,15 @@ class UserRepository:
 
     # turi tikrinti ir emaila ir passworda iskart
 
-    def register_user(self, login):
+    def register_user(self, login, name, surname, password):
         new_user = SAuser(name=name, surname=surname, email=login, password=password)
         session.add(new_user)
         session.commit()
-        exit()
-
-    # i funkcija turi ateiti name, surname, email, password
 
 
 class TaskRepository:
-    def add_task(self):
-        self.user_id = user.id
-        task = Task(self.title, self.description, self.deadline, self.user_id)
+    def add_task(self, user_id):
+        task = Task(title, description, deadline, user_id)
         session.add(task)
         session.commit()
 
@@ -62,40 +58,41 @@ class TaskRepository:
 
     def show_tasks(self):
         # retrieve User tasks from the database
-        tasks = session.query(Task).filter_by(user_id=user.id).all()
+        tasks = session.query(Task).filter_by(user_id=user_id).all()
         for task in tasks:
             print(task)
 
 
-# User interface /////
+# CLI /////
 
 print("Welcome TO DO list application")
 print("To start work with tasks You need to log in")
 
-user = UserRepository()
+user_repo = UserRepository()
 
 login = input("Please enter email:")
 
-if user.email_check(login) == 0:
+user_id = user_repo.email_check(login)
+
+if user_repo.email_check(login) == False:
     print("Please register new user")
     name = input("Enter name ")
     surname = input("Enter surname ")
     password = input("Enter password ")
-    user.register_user(login)
+    user_repo.register_user(login, name, surname, password)
 
-elif user.email_check(login) == 1:
+else:
     print("User email exists in users table")
 
+
 password = input("Please enter password:")
-user.password_check(password)
+if user_repo.password_check(password):
+    print("Please manage Your tasks")
+else:
+    user_repo.password_check(password)
+    print("Your password is wrong. Please enter right password")
 
-if user.passw == True:
-    print("Now You can manage Your tasks")
-if user.passw == False:
-    exit()
-
-
-task = TaskRepository()
+task_repo = TaskRepository()
 
 while True:
     choose = int(
@@ -104,23 +101,23 @@ while True:
         )
     )
     if choose == 1:
-        task.title = input("Please input title:")
-        task.description = input("Please input description:")
-        task.deadline = input("Please input deadline:")
-        task.add_task()
+        title = input("Please input title:")
+        description = input("Please input description:")
+        deadline = input("Please input deadline:")
+        task_repo.add_task(user_id)
 
     if choose == 2:
-        task.show_tasks()
+        task_repo.show_tasks()
         change_id = int(input("Please enter change task id:"))
-        task.update_task(change_id)
+        task_repo.update_task(change_id)
 
     if choose == 3:
-        task.show_tasks()
+        task_repo.show_tasks()
         delete_id = int(input("Please enter delete task id:"))
-        task.delete_task(delete_id)
+        task_repo.delete_task(delete_id)
 
     if choose == 4:
-        task.show_tasks()
+        task_repo.show_tasks()
 
     if choose == 5:
         print("Thank You for using ToDolist app. You exit!")
